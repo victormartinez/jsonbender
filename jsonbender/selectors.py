@@ -30,6 +30,19 @@ class S(Bender):
 
 
 class F(Bender):
+    """
+    Lifts a python callable into a Bender, so it can be composed.
+    The extra positional and named parameters are passed to the function at
+    bending time after the given value.
+
+    `func` is a callable
+
+    Example:
+    ```
+    f = F(sorted, key=lambda d: d['id'])
+    K([{'id': 3}, {'id': 1}]) >> f  #  -> [{'id': 1}, {'id': 3}]
+    ```
+    """
     def __init__(self, func, *args, **kwargs):
         self._func = func
         self._args = args
