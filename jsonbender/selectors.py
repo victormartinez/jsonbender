@@ -30,28 +30,28 @@ class S(Bender):
 
     def optional(self, default=None):
         """
-        Return an OptS with the same path and with the given `default`.
+        Return an OptionalS with the same path and with the given `default`.
         """
-        return OptS(*self._path, default=default)
+        return OptionalS(*self._path, default=default)
 
 
-class OptS(S):
+class OptionalS(S):
     """
     Similar to S. However, if any of the keys doesn't exist, returns the
     `default` value.
 
     `default` defaults to None.
     Example:
-        OptS('a', 0, 'b', default=23).execute({'a': []}) -> 23
+        OptionalS('a', 0, 'b', default=23).execute({'a': []}) -> 23
     """
 
     def __init__(self, *path, **kwargs):
         self.default = kwargs.get('default')
-        super(OptS, self).__init__(*path)
+        super(OptionalS, self).__init__(*path)
 
     def execute(self, source):
         try:
-            ret = super(OptS, self).execute(source)
+            ret = super(OptionalS, self).execute(source)
         except KeyError:
             return self.default
         else:

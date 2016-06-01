@@ -1,6 +1,6 @@
 import unittest
 
-from jsonbender.selectors import F, ProtectedF, K, S, OptS
+from jsonbender.selectors import F, ProtectedF, K, S, OptionalS
 
 
 class TestK(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestK(unittest.TestCase):
         self.assertEqual(K('string')({}), 'string')
 
 
-class STests(object):
+class STestsMixin(object):
     def test_no_selector_raises_value_error(self):
         self.assertRaises(ValueError, self.selector_cls)
 
@@ -24,31 +24,31 @@ class STests(object):
         self.assertEqual(self.selector_cls('a', 1, 'b')(source), 'ok!')
 
 
-class TestS(unittest.TestCase, STests):
+class TestS(unittest.TestCase, STestsMixin):
     selector_cls = S
 
     def test_missing_field(self):
         self.assertRaises(KeyError, self.selector_cls('k'), {})
 
 
-class TestOptS(unittest.TestCase, STests):
-    selector_cls = OptS
+class TestOptionalS(unittest.TestCase, STestsMixin):
+    selector_cls = OptionalS
 
     def test_opts(self):
-        opts = OptS('key', 'missing')
+        opts = OptionalS('key', 'missing')
         self.assertEqual(opts({'key': {'missing': 23}}), 23)
         self.assertEqual(opts({'key': {}}), None)
         self.assertEqual(opts({}), None)
 
     def test_opts_with_default_value(self):
         default = 27
-        opts = OptS('key', 'missing', default=default)
+        opts = OptionalS('key', 'missing', default=default)
         self.assertEqual(opts({'key': {'missing': 23}}), 23)
         self.assertEqual(opts({'key': {}}), default)
         self.assertEqual(opts({}), default)
 
 
-class FTests(object):
+class FTestsMixin(object):
     def test_f(self):
         self.assertEqual(self.selector_cls(len)(range(5)), 5)
 
@@ -72,11 +72,11 @@ class FTests(object):
         self.assertEqual((s >> f)(source), 5)
 
 
-class TestF(unittest.TestCase, FTests):
+class TestF(unittest.TestCase, FTestsMixin):
     selector_cls = F
 
 
-class TestProtectedF(unittest.TestCase, FTests):
+class TestProtectedF(unittest.TestCase, FTestsMixin):
     selector_cls = ProtectedF
 
     def test_protectedf(self):
