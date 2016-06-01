@@ -67,3 +67,39 @@ class F(Bender):
     def execute(self, value):
         return self._func(value, *self._args, **self._kwargs)
 
+    def protect(self, protect_against=None):
+        """
+        Return a ProtectedF with the same parameters and with the given
+        `protect_against`.
+        """
+        return ProtectedF(self._func,
+                          *self._args,
+                          protect_against=protect_against,
+                          **self._kwargs)
+
+
+class ProtectedF(F):
+    """
+    Similar to F.
+    However, if the passing value equals the `protect_against` parameter,
+    don't execute the function and return the passed value.
+
+    `protect_against` defaults to None.
+    Example:
+    ```
+        f = ProtectedF(lambda i: 1.0 / i, protect_against=0.0)
+        f.execute(0)  # -> 0
+    ```
+
+    """
+    def __init__(self, func, *args, **kwargs):
+        self._protect_against = kwargs.pop('protect_against', None)
+        super(ProtectedF, self).__init__(func, *args, **kwargs)
+
+    def execute(self, value):
+        if value == self._protect_against:
+            return value
+        else:
+            return super(ProtectedF, self).execute(value)
+
+

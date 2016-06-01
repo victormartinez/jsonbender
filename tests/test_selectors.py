@@ -1,6 +1,6 @@
 import unittest
 
-from jsonbender.selectors import F, K, S, OptS
+from jsonbender.selectors import F, ProtectedF, K, S, OptS
 
 
 class TestK(unittest.TestCase):
@@ -57,12 +57,26 @@ class TestF(unittest.TestCase):
         source = [{'v': 2}, {'v': 3}, {'v': 1}]
         self.assertEqual(f(source), [{'v': 1}, {'v': 2}, {'v': 3}])
 
+    def test_protect(self):
+        protected = F(int).protect(protect_against='bad')
+        self.assertIsInstance(protected, ProtectedF)
+        self.assertEqual(protected('123'), 123)
+        self.assertEqual(protected('bad'), 'bad')
+
+    # TODO: move this to a more general Bender test
     def test_composition(self):
         s = S('val')
         f = F(len)
         source = {'val': 'hello'}
         self.assertEqual((f << s)(source), 5)
         self.assertEqual((s >> f)(source), 5)
+
+
+class TestProtectedF(unittest.TestCase):
+    def test_protectedf(self):
+        protected = ProtectedF(int)
+        self.assertEqual(protected('123'), 123)
+        self.assertEqual(protected(None), None)
 
 
 if __name__ == '__main__':
