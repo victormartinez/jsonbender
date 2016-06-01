@@ -15,7 +15,7 @@ class STestsMixin(object):
     def test_no_selector_raises_value_error(self):
         self.assertRaises(ValueError, self.selector_cls)
 
-    def test_single_existing_field(self):
+    def test_shallow_existing_field(self):
         source = {'a': 'val'}
         self.assertEqual(self.selector_cls('a')(source), 'val')
 
@@ -27,23 +27,24 @@ class STestsMixin(object):
 class TestS(unittest.TestCase, STestsMixin):
     selector_cls = S
 
-    def test_missing_field(self):
+    def test_shallow_missing_field(self):
         self.assertRaises(KeyError, self.selector_cls('k'), {})
+
+    def test_deep_missing_field(self):
+        self.assertRaises(KeyError, self.selector_cls('k', 'k2'), {'k': {}})
 
 
 class TestOptionalS(unittest.TestCase, STestsMixin):
     selector_cls = OptionalS
 
-    def test_opts(self):
+    def test_opts_without_default(self):
         opts = OptionalS('key', 'missing')
-        self.assertEqual(opts({'key': {'missing': 23}}), 23)
         self.assertEqual(opts({'key': {}}), None)
         self.assertEqual(opts({}), None)
 
-    def test_opts_with_default_value(self):
+    def test_opts_with_default(self):
         default = 27
         opts = OptionalS('key', 'missing', default=default)
-        self.assertEqual(opts({'key': {'missing': 23}}), 23)
         self.assertEqual(opts({'key': {}}), default)
         self.assertEqual(opts({}), default)
 
