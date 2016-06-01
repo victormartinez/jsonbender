@@ -48,17 +48,17 @@ class TestOptS(unittest.TestCase, STests):
         self.assertEqual(opts({}), default)
 
 
-class TestF(unittest.TestCase):
+class FTests(object):
     def test_f(self):
-        self.assertEqual(F(len)(range(5)), 5)
+        self.assertEqual(self.selector_cls(len)(range(5)), 5)
 
     def test_curry_kwargs(self):
-        f = F(sorted, key=lambda d: d['v'])
+        f = self.selector_cls(sorted, key=lambda d: d['v'])
         source = [{'v': 2}, {'v': 3}, {'v': 1}]
         self.assertEqual(f(source), [{'v': 1}, {'v': 2}, {'v': 3}])
 
     def test_protect(self):
-        protected = F(int).protect(protect_against='bad')
+        protected = self.selector_cls(int).protect(protect_against='bad')
         self.assertIsInstance(protected, ProtectedF)
         self.assertEqual(protected('123'), 123)
         self.assertEqual(protected('bad'), 'bad')
@@ -66,13 +66,19 @@ class TestF(unittest.TestCase):
     # TODO: move this to a more general Bender test
     def test_composition(self):
         s = S('val')
-        f = F(len)
+        f = self.selector_cls(len)
         source = {'val': 'hello'}
         self.assertEqual((f << s)(source), 5)
         self.assertEqual((s >> f)(source), 5)
 
 
-class TestProtectedF(unittest.TestCase):
+class TestF(unittest.TestCase, FTests):
+    selector_cls = F
+
+
+class TestProtectedF(unittest.TestCase, FTests):
+    selector_cls = ProtectedF
+
     def test_protectedf(self):
         protected = ProtectedF(int)
         self.assertEqual(protected('123'), 123)
