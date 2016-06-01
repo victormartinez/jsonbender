@@ -10,15 +10,14 @@ class ListOp(Bender):
     to the operator's __init__(), a list of *values* and should return the
     desired result.
     """
-    def __init__(self, bender, function):
+    def __init__(self, function):
         self._func = function
-        self._bender = bender
 
     def op(self, func, vals):
         raise NotImplementedError()
 
     def execute(self, source):
-        return self.op(self._func, self._bender(source))
+        return self.op(self._func, source)
 
 
 class Forall(ListOp):

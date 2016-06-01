@@ -8,8 +8,7 @@ class ListOpTestCase(unittest.TestCase):
     cls = ListOp
 
     def assert_list_op(self, the_list, func, expected_value):
-        bender = self.cls(K(the_list), func)
-        self.assertEqual(bender({}), expected_value)
+        self.assertEqual(self.cls(func)(the_list), expected_value)
 
 
 class TestForall(ListOpTestCase):
@@ -26,8 +25,8 @@ class TestReduce(ListOpTestCase):
     cls = Reduce
 
     def test_empty_list(self):
-        bender = Reduce(K([]), lambda acc, i: acc + i)
-        self.assertRaises(ValueError, bender, {})
+        bender = Reduce(lambda acc, i: acc + i)
+        self.assertRaises(ValueError, bender, [])
 
     def test_nonempty_list(self):
         self.assert_list_op(range(1, 5), lambda acc, i: acc + i, 10)
