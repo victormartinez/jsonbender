@@ -1,4 +1,5 @@
 from itertools import chain
+from warnings import warn
 
 from jsonbender.core import Bender
 
@@ -10,13 +11,30 @@ class ListOp(Bender):
     to the operator's __init__(), a list of *values* and should return the
     desired result.
     """
-    def __init__(self, function):
-        self._func = function
+    def __init__(self, *args):
+        if len(args) == 1:
+            self._func = args[0]
+            self._bender = None
+        # TODO: this is here for compatibility reasons.
+        elif len(args) == 2:
+            self._bender, self._func = args
+            msg = ('Passing a bender to {0} is deprecated.'
+                   'Please use {0} in a composition chain '
+                   '(see docs for more details).'
+                   .format(type(self).__name__))
+            warn(DeprecationWarning(msg))
+        else:
+            msg = ('{} constructor only takes one parameter, {} given'
+                   .format(type(self).__name__, len(args)))
+            raise TypeError(msg)
 
     def op(self, func, vals):
         raise NotImplementedError()
 
     def execute(self, source):
+        # TODO: this is here for compatibility reasons
+        if self._bender:
+            source = self._bender(source)
         return self.op(self._func, source)
 
 
