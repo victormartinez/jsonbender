@@ -1,6 +1,6 @@
 import unittest
 
-from jsonbender import F, K, S
+from jsonbender.selectors import F, K, S, OptS
 
 
 class TestK(unittest.TestCase):
@@ -19,6 +19,21 @@ class TestS(unittest.TestCase):
     def test_deep_existing_path(self):
         source = {'a': [{}, {'b': 'ok!'}]}
         self.assertEqual(S('a', 1, 'b')(source), 'ok!')
+
+
+class TestOptS(unittest.TestCase):
+    def test_opts(self):
+        opts = OptS('key', 'missing')
+        self.assertEqual(opts({'key': {'missing': 23}}), 23)
+        self.assertEqual(opts({'key': {}}), None)
+        self.assertEqual(opts({}), None)
+
+    def test_opts_with_default_value(self):
+        default = 27
+        opts = OptS('key', 'missing', default=default)
+        self.assertEqual(opts({'key': {'missing': 23}}), 23)
+        self.assertEqual(opts({'key': {}}), default)
+        self.assertEqual(opts({}), default)
 
 
 class TestF(unittest.TestCase):
