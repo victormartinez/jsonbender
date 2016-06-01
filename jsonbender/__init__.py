@@ -4,5 +4,5 @@ from jsonbender.string_ops import Format
 from jsonbender.selectors import F, K, S, OptionalS
 
 
-__version__ = '0.4.1'
+__version__ = '0.5.0'
 
