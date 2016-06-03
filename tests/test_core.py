@@ -1,6 +1,7 @@
 import unittest
 
-from jsonbender import bend, BendingException, S, K
+from jsonbender import S, K
+from jsonbender.core import bend, BendingException, Context
 
 
 class TestBend(unittest.TestCase):
@@ -61,6 +62,21 @@ class TestBend(unittest.TestCase):
         mapping = {'a': S('nonexistant')}
         source = {}
         self.assertRaises(BendingException, bend, mapping, source)
+
+    def test_constants_without_K(self):
+        mapping = {'a': 'a const value', 'b': 123}
+        self.assertDictEqual(bend(mapping, {}),
+                             {'a': 'a const value', 'b': 123})
+
+    def test_context_shallow(self):
+        mapping = {'a': Context() >> S('b')}
+        res = bend(mapping, {}, context={'b': 23})
+        self.assertDictEqual(res, {'a': 23})
+
+    def test_context_deep(self):
+        mapping = {'a': [{'a': Context() >> S('b')}]}
+        res = bend(mapping, {}, context={'b': 23})
+        self.assertDictEqual(res, {'a': [{'a': 23}]})
 
 
 class TestOperators(unittest.TestCase):

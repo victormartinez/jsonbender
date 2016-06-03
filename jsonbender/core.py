@@ -17,10 +17,16 @@ class Bender(object):
     """
 
     def __init__(self, *args, **kwargs):
-        raise NotImplementedError()
+        pass
 
     def __call__(self, source):
-        return self.execute(source)
+        return self.raw_execute(source)
+
+    def raw_execute(self, source):
+        if isinstance(source, Transport):
+            return Transport(self.execute(source.value), source.context)
+        else:
+            return self.execute(source)
 
     def execute(self, source):
         raise NotImplementedError()
@@ -60,7 +66,7 @@ class Compose(Bender):
         self._first = first
         self._second = second
 
-    def execute(self, source):
+    def raw_execute(self, source):
         return self._second(self._first(source))
 
 
@@ -108,11 +114,22 @@ class Div(BinaryOperator):
         return float(v1) / float(v2)
 
 
+class Context(Bender):
+    def raw_execute(self, source):
+        return Transport(source.context, source.context)
+
+
 class BendingException(Exception):
     pass
 
 
-def bend(mapping, source):
+class Transport(object):
+    def __init__(self, value, context):
+        self.value = value
+        self.context = context
+
+
+def bend(mapping, source, context=None):
     """
     The main bending function.
 
@@ -121,18 +138,26 @@ def bend(mapping, source):
 
     returns a new dict according to the provided map.
     """
+    context = {} if context is None else context
+    transport = Transport(source, context)
+    return _bend(mapping, transport)
+
+
+def _bend(mapping, transport):
     res = {}
     for k, value in iteritems(mapping):
         if isinstance(value, Bender):
             try:
-                newv = value(source)
+                newv = value(transport).value
             except Exception as e:
                 m = 'Error for key {}: {}'.format(k, str(e))
                 raise BendingException(m)
         elif isinstance(value, list):
-            newv = map(lambda v: bend(v, source), value)
+            newv = map(lambda v: _bend(v, transport), value)
+        elif isinstance(value, dict):
+            newv = _bend(value, transport)
         else:
-            newv = bend(value, source)
+            newv = value
         res[k] = newv
     return res
 
