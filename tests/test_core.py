@@ -62,6 +62,11 @@ class TestBend(unittest.TestCase):
         source = {}
         self.assertRaises(BendingException, bend, mapping, source)
 
+    def test_constants_without_K(self):
+        mapping = {'a': 'a const value', 'b': 123}
+        self.assertDictEqual(bend(mapping, {}),
+                             {'a': 'a const value', 'b': 123})
+
 
 class TestOperators(unittest.TestCase):
     def test_add(self):

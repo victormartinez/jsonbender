@@ -131,8 +131,10 @@ def bend(mapping, source):
                 raise BendingException(m)
         elif isinstance(value, list):
             newv = map(lambda v: bend(v, source), value)
-        else:
+        elif isinstance(value, dict):
             newv = bend(value, source)
+        else:
+            newv = value
         res[k] = newv
     return res
 
