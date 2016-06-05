@@ -1,5 +1,3 @@
-from functools import partial
-
 from jsonbender._compat import iteritems
 
 
@@ -23,10 +21,8 @@ class Bender(object):
         return self.raw_execute(source)
 
     def raw_execute(self, source):
-        if isinstance(source, Transport):
-            return Transport(self.execute(source.value), source.context)
-        else:
-            return self.execute(source)
+        transport = Transport.from_source(source)
+        return Transport(self.execute(transport.value), transport.context)
 
     def execute(self, source):
         raise NotImplementedError()
@@ -91,7 +87,8 @@ class BinaryOperator(Bender):
         raise NotImplementedError()
 
     def execute(self, source):
-        return self.op(self._bender1(source), self._bender2(source))
+        return self.op(self._bender1(source).value,
+                       self._bender2(source).value)
 
 
 class Add(BinaryOperator):
@@ -127,6 +124,13 @@ class Transport(object):
     def __init__(self, value, context):
         self.value = value
         self.context = context
+
+    @classmethod
+    def from_source(cls, source):
+        if isinstance(source, cls):
+            return source
+        else:
+            return cls(source, {})
 
 
 def bend(mapping, source, context=None):

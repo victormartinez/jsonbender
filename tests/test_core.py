@@ -2,6 +2,7 @@ import unittest
 
 from jsonbender import S, K
 from jsonbender.core import bend, BendingException, Context
+from jsonbender.test import BenderTestMixin
 
 
 class TestBend(unittest.TestCase):
@@ -79,24 +80,25 @@ class TestBend(unittest.TestCase):
         self.assertDictEqual(res, {'a': [{'a': 23}]})
 
 
-class TestOperators(unittest.TestCase):
+class TestOperators(unittest.TestCase, BenderTestMixin):
     def test_add(self):
-        self.assertEqual((S('v1') + K(2))({'v1': 5}), 7)
+        self.assert_bender(K(5) + K(2), None, 7)
 
     def test_sub(self):
-        self.assertEqual((S('v1') - K(2))({'v1': 5}), 3)
+        self.assert_bender(K(5) - K(2), None, 3)
 
     def test_mul(self):
-        self.assertEqual((S('v1') * K(2))({'v1': 5}), 10)
+        self.assert_bender(K(5) * K(2), None, 10)
 
     def test_div(self):
-        self.assertAlmostEqual((S('v1') / K(2))({'v1': 5}), 2.5, 2)
+        self.assert_bender(K(4) / K(2), None, 2)
+        self.assertAlmostEqual((K(5) / K(2))(None).value, 2.5, 2)
 
 
-class TestGetItem(unittest.TestCase):
+class TestGetItem(unittest.TestCase, BenderTestMixin):
     def test_getitem(self):
         bender = S('val')[2:8:2]
-        self.assertEqual(bender({'val': range(10)}), [2, 4, 6])
+        self.assert_bender(bender, {'val': range(10)}, [2, 4, 6])
 
 
 if __name__ == '__main__':
