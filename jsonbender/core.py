@@ -18,7 +18,7 @@ class Bender(object):
         pass
 
     def __call__(self, source):
-        return self.raw_execute(source)
+        return self.raw_execute(source).value
 
     def raw_execute(self, source):
         transport = Transport.from_source(source)
@@ -63,7 +63,7 @@ class Compose(Bender):
         self._second = second
 
     def raw_execute(self, source):
-        return self._second(self._first(source))
+        return self._second.raw_execute(self._first.raw_execute(source))
 
 
 class BinaryOperator(Bender):
@@ -87,8 +87,8 @@ class BinaryOperator(Bender):
         raise NotImplementedError()
 
     def execute(self, source):
-        return self.op(self._bender1(source).value,
-                       self._bender2(source).value)
+        return self.op(self._bender1(source),
+                       self._bender2(source))
 
 
 class Add(BinaryOperator):
@@ -113,7 +113,8 @@ class Div(BinaryOperator):
 
 class Context(Bender):
     def raw_execute(self, source):
-        return Transport(source.context, source.context)
+        transport = Transport.from_source(source)
+        return Transport(transport.context, transport.context)
 
 
 class BendingException(Exception):
@@ -152,7 +153,7 @@ def _bend(mapping, transport):
     for k, value in iteritems(mapping):
         if isinstance(value, Bender):
             try:
-                newv = value(transport).value
+                newv = value(transport)
             except Exception as e:
                 m = 'Error for key {}: {}'.format(k, str(e))
                 raise BendingException(m)
