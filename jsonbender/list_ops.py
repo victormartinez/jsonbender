@@ -35,7 +35,7 @@ class ListOp(Bender):
     def execute(self, source):
         # TODO: this is here for compatibility reasons
         if self._bender:
-            source = self._bender(source)
+            source = self._bender(source).value
         return self.op(self._func, source)
 
 

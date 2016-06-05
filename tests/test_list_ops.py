@@ -3,13 +3,14 @@ import unittest
 
 from jsonbender import K
 from jsonbender.list_ops import Forall, FlatForall, Filter, ListOp, Reduce
+from jsonbender.test import BenderTestMixin
 
 
-class ListOpTestCase(unittest.TestCase):
+class ListOpTestCase(unittest.TestCase, BenderTestMixin):
     cls = ListOp
 
     def assert_list_op(self, the_list, func, expected_value):
-        self.assertEqual(self.cls(func)(the_list), expected_value)
+        self.assert_bender(self.cls(func), the_list, expected_value)
 
 
 class TestForall(ListOpTestCase):
@@ -24,7 +25,7 @@ class TestForall(ListOpTestCase):
     def test_compatibility(self):
         # TODO: remove this when compatibility is broken
         bender = self.cls(K([1]), lambda i: i)
-        self.assertEqual(bender({}), [1])
+        self.assert_bender(bender, {}, [1])
 
 
 class TestReduce(ListOpTestCase):
@@ -40,7 +41,7 @@ class TestReduce(ListOpTestCase):
     def test_compatibility(self):
         # TODO: remove this when compatibility is broken
         bender = self.cls(K([1, 2]), add)
-        self.assertEqual(bender({}), 3)
+        self.assert_bender(bender, {}, 3)
 
 
 class TestFilter(ListOpTestCase):
@@ -61,7 +62,7 @@ class TestFilter(ListOpTestCase):
     def test_compatibility(self):
         # TODO: remove this on next release
         bender = self.cls(K([1]), lambda i: True)
-        self.assertEqual(bender({}), [1])
+        self.assert_bender(bender, {}, [1])
 
 
 class TestFlatForall(ListOpTestCase):
@@ -78,7 +79,7 @@ class TestFlatForall(ListOpTestCase):
     def test_compatibility(self):
         # TODO: remove this on next release
         bender = self.cls(K([1]), lambda i: [i])
-        self.assertEqual(bender({}), [1])
+        self.assert_bender(bender, {}, [1])
 
 
 if __name__ == '__main__':

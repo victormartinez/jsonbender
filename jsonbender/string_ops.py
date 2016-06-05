@@ -1,4 +1,4 @@
-from jsonbender.core import Bender
+from jsonbender.core import Bender, Transport
 from jsonbender._compat import iteritems
 
 
@@ -22,9 +22,11 @@ class Format(Bender):
         self._positional_benders = args
         self._named_benders = kwargs
 
-    def execute(self, source):
-        args = [bender(source) for bender in self._positional_benders]
-        kwargs = {k: bender(source)
+    def raw_execute(self, source):
+        transport = Transport.from_source(source)
+        args = [bender(transport).value for bender in self._positional_benders]
+        kwargs = {k: bender(transport).value
                   for k, bender in iteritems(self._named_benders)}
-        return self._format_str.format(*args, **kwargs)
+        value = self._format_str.format(*args, **kwargs)
+        return Transport(value, transport.context)
 
