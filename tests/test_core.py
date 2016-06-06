@@ -92,7 +92,7 @@ class TestOperators(unittest.TestCase, BenderTestMixin):
 
     def test_div(self):
         self.assert_bender(K(4) / K(2), None, 2)
-        self.assertAlmostEqual((K(5) / K(2))(None).value, 2.5, 2)
+        self.assertAlmostEqual((K(5) / K(2))(None), 2.5, 2)
 
 
 class TestGetItem(unittest.TestCase, BenderTestMixin):

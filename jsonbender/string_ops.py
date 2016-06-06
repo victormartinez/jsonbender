@@ -24,8 +24,8 @@ class Format(Bender):
 
     def raw_execute(self, source):
         transport = Transport.from_source(source)
-        args = [bender(transport).value for bender in self._positional_benders]
-        kwargs = {k: bender(transport).value
+        args = [bender(source) for bender in self._positional_benders]
+        kwargs = {k: bender(source)
                   for k, bender in iteritems(self._named_benders)}
         value = self._format_str.format(*args, **kwargs)
         return Transport(value, transport.context)
