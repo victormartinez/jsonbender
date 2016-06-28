@@ -53,7 +53,7 @@ class Forall(ListOp):
     op = map
 
     @classmethod
-    def bend(cls, mapping):
+    def bend(cls, mapping, context=None):
         """
         Return a Forall instance that bends each element of the list with the
         given mapping.
@@ -68,7 +68,7 @@ class Forall(ListOp):
         ```
 
         """
-        return cls(lambda source: bend(mapping, source))
+        return cls(lambda source: bend(mapping, source, context))
 
 
 class Reduce(ListOp):
