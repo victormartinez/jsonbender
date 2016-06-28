@@ -1,7 +1,7 @@
 from operator import add
 import unittest
 
-from jsonbender import K
+from jsonbender import K, S
 from jsonbender.list_ops import Forall, FlatForall, Filter, ListOp, Reduce
 from jsonbender.test import BenderTestMixin
 
@@ -26,6 +26,11 @@ class TestForall(ListOpTestCase):
         # TODO: remove this when compatibility is broken
         bender = self.cls(K([1]), lambda i: i)
         self.assert_bender(bender, {}, [1])
+
+    def test_bend(self):
+        self.assert_bender(self.cls.bend({'b': S('a')}),
+                           [{'a': 23}, {'a': 27}],
+                           [{'b': 23}, {'b': 27}])
 
 
 class TestReduce(ListOpTestCase):
