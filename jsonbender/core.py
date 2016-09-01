@@ -86,9 +86,11 @@ class BinaryOperator(Bender):
     def op(self, v1, v2):
         raise NotImplementedError()
 
-    def execute(self, source):
-        return self.op(self._bender1(source),
-                       self._bender2(source))
+    def raw_execute(self, source):
+        source = Transport.from_source(source)
+        val = self.op(self._bender1(source),
+                      self._bender2(source))
+        return Transport(val, source.context)
 
 
 class Add(BinaryOperator):
