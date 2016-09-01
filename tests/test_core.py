@@ -1,7 +1,7 @@
 import unittest
 
 from jsonbender import S, K
-from jsonbender.core import bend, BendingException, Context
+from jsonbender.core import bend, BendingException, Context, BinaryOperator
 from jsonbender.test import BenderTestMixin
 
 
@@ -93,6 +93,13 @@ class TestOperators(unittest.TestCase, BenderTestMixin):
     def test_div(self):
         self.assert_bender(K(4) / K(2), None, 2)
         self.assertAlmostEqual((K(5) / K(2))(None), 2.5, 2)
+
+    def test_op_with_context(self):
+        mapping = {'res': (Context() >> S('b')) - S('a')}
+        in_ = {'a': 23}
+        context = {'b': 27}
+        res = bend(mapping, in_, context=context)
+        self.assertEqual(res, {'res': 4})
 
 
 class TestGetItem(unittest.TestCase, BenderTestMixin):
