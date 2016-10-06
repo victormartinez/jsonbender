@@ -2,7 +2,7 @@ from functools import reduce
 from itertools import chain
 from warnings import warn
 
-from jsonbender.core import Bender, bend
+from jsonbender.core import Bender, bend, Transport
 
 
 class ListOp(Bender):
@@ -55,10 +55,13 @@ class Forall(ListOp):
     @classmethod
     def bend(cls, mapping, context=None):
         """
-        Return a Forall instance that bends each element of the list with the
+        Return a ForallBend instance that bends each element of the list with the
         given mapping.
 
         mapping: a JSONBender mapping as passed to the `bend()` function.
+        context: optional. the context that will be passed to `bend()`.
+                 Note that if context is not passed, it defaults at bend-time
+                 to the one passed to the outer mapping.
 
         Example:
         ```
@@ -68,7 +71,32 @@ class Forall(ListOp):
         ```
 
         """
-        return cls(lambda source: bend(mapping, source, context))
+        return ForallBend(mapping, context)
+
+
+class ForallBend(Forall):
+    """
+    Bends each element of the list with given mapping and context.
+
+    mapping: a JSONBender mapping as passed to the `bend()` function.
+    context: optional. the context that will be passed to `bend()`.
+             Note that if context is not passed, it defaults at bend-time
+             to the one passed to the outer mapping.
+    """
+
+    def __init__(self, mapping, context=None):
+        self._mapping = mapping
+        self._context = context
+        # TODO this is here for retrocompatibility reasons.
+        # remove this when ListOp also breaks retrocompatibility
+        self._bender = None
+
+    def raw_execute(self, source):
+        transport = Transport.from_source(source)
+        context = self._context or transport.context
+        # ListOp.execute assumes the func is saved on self._func
+        self._func = lambda v: bend(self._mapping, v, context)
+        return Transport(self.execute(transport.value), transport.context)
 
 
 class Reduce(ListOp):
