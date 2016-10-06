@@ -76,12 +76,12 @@ class Forall(ListOp):
 
 class ForallBend(Forall):
     """
-        Bends each element of the list with given mapping and context.
+    Bends each element of the list with given mapping and context.
 
-        mapping: a JSONBender mapping as passed to the `bend()` function.
-        context: optional. the context that will be passed to `bend()`.
-                 Note that if context is not passed, it defaults at bend-time
-                 to the one passed to the outer mapping.
+    mapping: a JSONBender mapping as passed to the `bend()` function.
+    context: optional. the context that will be passed to `bend()`.
+             Note that if context is not passed, it defaults at bend-time
+             to the one passed to the outer mapping.
     """
 
     def __init__(self, mapping, context=None):

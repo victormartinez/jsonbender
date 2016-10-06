@@ -207,10 +207,19 @@ assert ret == {'doubles': [0, 2, 4, 6, 8]}
 ```
 
 For the common case of applying a JSONBender mapping to each element of a list,
-the `Forall.bend()` class method is provided.
+the `.bend()` *class method* is provided, which returns a `ForallBend` instance
+. `.bend()` takes the mapping and the context (optional) which are then passed
+to `ForallBend`.
+
+
+##### ForallBend
+Bends each element of the list with given mapping and context.
+
+If no contexxt is passed, it "inherits" at bend-time the context passed to the outer `bend()` call.
+
 
 ```python
-MAPPING = {'list_of_bs': S('list_of_as') >> Forall.bend({'b': S('a')})}
+MAPPING = {'list_of_bs': S('list_of_as') >> ForallBend({'b': S('a')})}
 source = {'list_of_as': [{'a': 23}, {'a': 27}]}
 ret = bend(MAPPING, source)
 assert ret == {'list_of_bs': [{'b': 23}, {'b': 27}]}
