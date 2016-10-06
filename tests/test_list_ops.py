@@ -1,7 +1,7 @@
 from operator import add
 import unittest
 
-from jsonbender import Context, K, S
+from jsonbender import Context, K, S, bend
 from jsonbender.list_ops import Forall, FlatForall, Filter, ListOp, Reduce
 from jsonbender.test import BenderTestMixin
 
@@ -38,6 +38,14 @@ class TestForall(ListOpTestCase):
         self.assert_bender(self.cls.bend(mapping, context),
                            [{}, {}],
                            [{'b': 42}, {'b': 42}])
+
+    def test_bend_inherits_outer_context_by_default(self):
+        inner_mapping = {'val': Context()}
+        outer_mapping = {'a': S('items') >> Forall.bend(inner_mapping)}
+        source = {'items': range(3)}
+        got = bend(outer_mapping, source, context=27)
+        expected = {'a': [{'val': 27}, {'val': 27}, {'val': 27}]}
+        self.assertEqual(got, expected)
 
 
 class TestReduce(ListOpTestCase):
