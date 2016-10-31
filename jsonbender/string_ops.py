@@ -30,3 +30,27 @@ class Format(Bender):
         value = self._format_str.format(*args, **kwargs)
         return Transport(value, transport.context)
 
+
+class ProtectedFormat(Format):
+    """
+    Returns a formatted String, like Python's built-in format.
+    If one of the arguments is None, it evaluates to None
+    Examples:
+        fmt = Format('{} {} {last}', S('first'), S('second'), last=S('last'))
+        source = {'first': 'Edsger', 'second': 'W.', 'last': 'Dijkstra'}
+        fmt.execute(source)  # -> 'Edsger W. Dijkstra'
+
+        fmt = Format('{} {}', S('first'), S('second'))
+        source = {'first': 'Edsger'}
+        fmt.execute(source)  # -> None
+    """
+    def raw_execute(self, source):
+        # if any of the args to print are None, return None
+        if any(
+            [bender(source) is None for bender in self._positional_benders] +
+            [bender(source) is None for bender in self._named_benders.values()]
+        ):
+            # create an object with property value=None so it can be processed
+            return type(str('none_obj'), (object,), dict(value=None))
+        # else just behave normally
+        return super(ProtectedFormat, self).raw_execute(source)
