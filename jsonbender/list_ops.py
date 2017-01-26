@@ -50,7 +50,9 @@ class Forall(ListOp):
     Forall(lambda i: i * 2)(range(5))  # -> [0, 2, 4, 6, 8]
     ```
     """
-    op = map
+
+    def op(self, func, vals):
+        return list(map(func, vals))
 
     @classmethod
     def bend(cls, mapping, context=None):
@@ -118,7 +120,7 @@ class Reduce(ListOp):
         try:
             return reduce(func, vals)
         except TypeError as e:  # empty list with no initial value
-            raise ValueError(e.message)
+            raise ValueError(e.args[0])
 
 
 class Filter(ListOp):
@@ -132,7 +134,9 @@ class Filter(ListOp):
     Filter(lambda i: i % 2 == 0)(range(5))  # -> [0, 2, 4]
     ```
     """
-    op = filter
+
+    def op(self, func, vals):
+        return list(filter(func, vals))
 
 
 class FlatForall(ListOp):
