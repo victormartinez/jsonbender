@@ -1,7 +1,7 @@
 import unittest
 
 from jsonbender import S, K
-from jsonbender.core import bend, BendingException, Context, BinaryOperator
+from jsonbender.core import bend, BendingException, Context
 from jsonbender.test import BenderTestMixin
 
 
@@ -100,6 +100,10 @@ class TestOperators(unittest.TestCase, BenderTestMixin):
         context = {'b': 27}
         res = bend(mapping, in_, context=context)
         self.assertEqual(res, {'res': 4})
+
+    def test_eq(self):
+        self.assert_bender(K(42) == K(42), None, True)
+        self.assert_bender(K(42) == K(27), None, False)
 
 
 class TestGetItem(unittest.TestCase, BenderTestMixin):

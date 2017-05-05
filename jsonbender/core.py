@@ -27,6 +27,9 @@ class Bender(object):
     def execute(self, source):
         raise NotImplementedError()
 
+    def __eq__(self, other):
+        return Eq(self, other)
+
     def __add__(self, other):
         return Add(self, other)
 
@@ -111,6 +114,11 @@ class Mul(BinaryOperator):
 class Div(BinaryOperator):
     def op(self, v1, v2):
         return float(v1) / float(v2)
+
+
+class Eq(BinaryOperator):
+    def op(self, v1, v2):
+        return v1 == v2
 
 
 class Context(Bender):
