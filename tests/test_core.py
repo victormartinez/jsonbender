@@ -1,5 +1,7 @@
 import unittest
 
+import sys
+
 from jsonbender import S, K
 from jsonbender.core import bend, BendingException, Context
 from jsonbender.test import BenderTestMixin
@@ -109,7 +111,11 @@ class TestOperators(unittest.TestCase, BenderTestMixin):
 class TestGetItem(unittest.TestCase, BenderTestMixin):
     def test_getitem(self):
         bender = S('val')[2:8:2]
-        self.assert_bender(bender, {'val': range(10)}, [2, 4, 6])
+        if sys.version_info.major == 2:
+            val = range(10)
+        else:
+            val = list(range(10))
+        self.assert_bender(bender, {'val': val}, [2, 4, 6])
 
 
 if __name__ == '__main__':

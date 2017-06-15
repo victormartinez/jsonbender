@@ -42,6 +42,12 @@ class Bender(object):
     def __div__(self, other):
         return Div(self, other)
 
+    def __truediv__(self, other):
+        return Div(self, other)
+
+    def __floordiv__(self, other):
+        return Div(self, other)
+
     def __rshift__(self, other):
         return Compose(self, other)
 
@@ -168,7 +174,7 @@ def _bend(mapping, transport):
                 m = 'Error for key {}: {}'.format(k, str(e))
                 raise BendingException(m)
         elif isinstance(value, list):
-            newv = map(lambda v: _bend(v, transport), value)
+            newv = list(map(lambda v: _bend(v, transport), value))
         elif isinstance(value, dict):
             newv = _bend(value, transport)
         else:
