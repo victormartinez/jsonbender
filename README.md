@@ -238,6 +238,71 @@ ret = bend(MAPPING, source)
 assert ret == {'doubles_triples': [4, 6, 30, 45, 100, 150]}
 ```
 
+#### Control Flow
+
+Sometimes what bender to use must be decided at bending time,
+so JSONBender provides 3 control flow structures:
+
+
+##### Alternation
+
+Take any number of benders, and return the value of the first one that
+doesn't raise a LookupError (KeyError, IndexError etc.).
+
+If all benders raise LookupError, re-raise the last raised exception.
+
+```python
+b = Alternation(S(1), S(0), S('key1'))
+
+b(['a', 'b'])  #  -> 'b'
+b(['a'])  #  -> 'a'
+b([])  #  -> KeyError
+b({})  #  -> KeyError
+b({'key1': 23})  # -> 23
+```
+
+##### If
+
+Takes a condition bender, and two benders (both default to K(None)).
+If the condition bender evaluates to true, return the value of the first
+bender. If it evaluates to false, return the value of the second bender.
+
+```python
+if_ = If(S('country') == K('China'), S('first_name'), S('last_name'))
+if_({'country': 'China',
+     'first_name': 'Li',
+     'last_name': 'Na'})  # ->  'Li'
+
+if_({'country': 'Brazil',
+     'first_name': 'Gustavo',
+     'last_name': 'Kuerten'})  # -> 'Kuerten'
+```
+
+##### Switch
+
+Take a key bender, a 'case' container of benders and a default bender
+(optional).
+
+The value returned by the key bender is used to get a bender from the
+case container, which then returns the result.
+
+If the key is not in the case container, the default is used.
+
+If it's unavailable, raise the original LookupError.
+
+```python
+b = Switch(S('service'),
+           {'twitter': S('handle'),
+            'mastodon': S('handle') + K('@') + S('server')},
+           default=S('email'))
+
+b({'service': 'twitter', 'handle': 'etandel'})  #  -> 'etandel'
+b({'service': 'mastodon', 'handle': 'etandel',
+   'server': 'mastodon.social'})  #  -> 'etandel@mastodon.social'
+b({'service': 'facebook',
+   'email': 'email@whatever.com'})  #  -> 'email@whatever.com'
+```
+
 #### String ops
 
 JSONBender currently provides only one string-related bender.

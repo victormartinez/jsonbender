@@ -18,7 +18,6 @@ class If(Bender):
     if_({'country': 'Brazil',
          'first_name': 'Gustavo',
          'last_name': 'Kuerten'})  # -> 'Kuerten'
-
     ```
     """
 
