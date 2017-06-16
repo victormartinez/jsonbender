@@ -52,7 +52,7 @@ class OptionalS(S):
     def execute(self, source):
         try:
             ret = super(OptionalS, self).execute(source)
-        except KeyError:
+        except LookupError:
             return self.default
         else:
             return ret

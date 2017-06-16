@@ -49,6 +49,9 @@ class TestOptionalS(unittest.TestCase, STestsMixin):
         self.assert_bender(bender, {'key': {}}, default)
         self.assert_bender(bender, {}, default)
 
+    def test_activate_on_IndexError(self):
+        self.assert_bender(OptionalS(0), [], None)
+
 
 class FTestsMixin(BenderTestMixin):
     def test_f(self):
