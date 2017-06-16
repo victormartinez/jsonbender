@@ -5,5 +5,5 @@ from jsonbender.selectors import F, K, S, OptionalS
 from jsonbender.control_flow import Alternation, If, Switch
 
 
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 
