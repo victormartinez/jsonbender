@@ -96,6 +96,10 @@ class TestOperators(unittest.TestCase, BenderTestMixin):
         self.assert_bender(K(4) / K(2), None, 2)
         self.assertAlmostEqual((K(5) / K(2))(None), 2.5, 2)
 
+    def test_neg(self):
+        self.assert_bender(-K(1), None, -1)
+        self.assert_bender(-K(-1), None, 1)
+
     def test_op_with_context(self):
         mapping = {'res': (Context() >> S('b')) - S('a')}
         in_ = {'a': 23}
@@ -106,6 +110,22 @@ class TestOperators(unittest.TestCase, BenderTestMixin):
     def test_eq(self):
         self.assert_bender(K(42) == K(42), None, True)
         self.assert_bender(K(42) == K(27), None, False)
+
+    def test_and(self):
+        self.assert_bender(K(True) & K(True), None, True)
+        self.assert_bender(K(True) & K(False), None, False)
+        self.assert_bender(K(False) & K(True), None, False)
+        self.assert_bender(K(False) & K(False), None, False)
+
+    def test_or(self):
+        self.assert_bender(K(True) | K(True), None, True)
+        self.assert_bender(K(True) | K(False), None, True)
+        self.assert_bender(K(False) | K(True), None, True)
+        self.assert_bender(K(False) | K(False), None, False)
+
+    def test_invert(self):
+        self.assert_bender(~K(True), None, False)
+        self.assert_bender(~K(False), None, True)
 
 
 class TestGetItem(unittest.TestCase, BenderTestMixin):
