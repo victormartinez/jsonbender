@@ -280,8 +280,16 @@ b = Alternation(S(1), S(0), S('key1'))
 
 b(['a', 'b'])  #  -> 'b'
 b(['a'])  #  -> 'a'
-b([])  #  -> KeyError
-b({})  #  -> KeyError
+try:
+    b([])  #  -> TypeError
+except TypeError:
+    pass
+
+try:
+    b({})  #  -> KeyError
+except KeyError:
+    pass
+
 b({'key1': 23})  # -> 23
 ```
 
