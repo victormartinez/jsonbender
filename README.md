@@ -72,6 +72,8 @@ It takes any value as a parameter and always returns that value regardless of th
 `S()` is a selector for accessing keys and indices: It takes a variable number of keys / indices and returns the corresponding value on the source dict:
 
 ```python
+from jsonbender import bend, S
+
 MAPPING = {'val': S('a', 'deeply', 'nested', 0, 'value')}
 ret = bend(MAPPING, {'a': {'deeply': {'nested': [{'value': 42}]}}})
 assert ret == {'val': 42}
@@ -85,15 +87,17 @@ If any of keys may not exist, `S()` can be "annotated" by calling the `.optional
 `OptionalS` is like `S()` but does not raise errors when any of the keys is not found. Instead, it returns `None` or the `default` value that is passed on its construction.
 
 ```python
-source = {'does': {'exist': 23}
+from jsonbender import bend, OptionalS
+
+source = {'does': {'exist': 23}}
 
 MAPPING_1 = {'val': OptionalS('does', 'not', 'exist')}
-ret = bend(MAPPING_1, }, source)
+ret = bend(MAPPING_1, source)
 assert ret == {'val': None}
 
 MAPPING_2 = {'val': OptionalS('does', 'not', 'exist', default=27)}
-ret = bend(MAPPING_2, }, source)
-assert ret == {'val': 28}
+ret = bend(MAPPING_2, source)
+assert ret == {'val': 27}
 ```
 
 For readability and reusability, prefer using `S().optional()` instead.
@@ -107,9 +111,11 @@ The extra optional args and kwargs are passed to the function at
 bending time after the given value.
 
 ```python
+from jsonbender import bend, F, S
+
 MAPPING = {
     'total_number_of_keys': F(len),
-    'number_of_str_keys': F(lambda source: len([k for k in source.iterkeys()
+    'number_of_str_keys': F(lambda source: len([k for k in source.keys()
                                                 if isinstance(k, str)])),
     'price_truncated': S('price_as_str') >> F(float) >> F(int),
 }
@@ -123,13 +129,14 @@ If the function can't take certain values, you can protect it by calling the `.p
 
 ```python
 import math
+from jsonbender import bend, F, S
 
 MAPPING_1 = {'sqrt': S('val') >> F(math.sqrt).protect()}
-assert bend(MAPPING, {'val': 4}) == {'sqrt': 2}
-assert bend(MAPPING, {'val': None}) == {'sqrt': None}
+assert bend(MAPPING_1, {'val': 4}) == {'sqrt': 2}
+assert bend(MAPPING_1, {'val': None}) == {'sqrt': None}
 
 MAPPING_2 = {'sqrt': S('val') >> F(math.sqrt).protect(-1)}
-assert bend(MAPPING, {'val': -1}) == {'sqrt': -1}
+assert bend(MAPPING_2, {'val': -1}) == {'sqrt': -1}
 ```
 
 
@@ -143,6 +150,8 @@ For the arithmetic `+`, `-`, `*`, `/`,
 the behavior is to apply the operator to the bended values of each operand.
 
 ```python
+from jsonbender import bend, K, S
+
 a = S('a')
 b = S('b')
 MAPPING = {'add': a + b, 'sub': a - b, 'mul': a * b, 'div': a / b}
@@ -176,6 +185,8 @@ iterable.
 
 
 ```python
+from jsonbender import bend, Reduce, S
+
 MAPPING = {'sum': S('ints') >> Reduce(lambda acc, i: acc + i)}
 ret = bend(MAPPING, {'ints': [1, 4, 7, 9]})
 assert ret == {'sum': 21}
@@ -188,6 +199,8 @@ Builds a new list with the elements of the iterable for which the given
 function returns True.
 
 ```python
+from jsonbender import bend, Filter, S
+
 MAPPING = {'even': S('ints') >> Filter(lambda i: i % 2 == 0)}
 ret = bend(MAPPING, {'ints': range(5)})
 assert ret == {'even': [0, 2, 4]}
@@ -201,6 +214,8 @@ iterable.
 
 
 ```python
+from jsonbender import bend, Forall, S
+
 MAPPING = {'doubles': S('ints') >> Forall(lambda i: i * 2)}
 ret = bend(MAPPING, {'ints': range(5)})
 assert ret == {'doubles': [0, 2, 4, 6, 8]}
@@ -215,10 +230,13 @@ to `ForallBend`.
 ##### ForallBend
 Bends each element of the list with given mapping and context.
 
-If no contexxt is passed, it "inherits" at bend-time the context passed to the outer `bend()` call.
+If no context is passed, it "inherits" at bend-time the context passed to the outer `bend()` call.
 
 
 ```python
+from jsonbender import bend, S
+from jsonbender.list_ops import ForallBend
+
 MAPPING = {'list_of_bs': S('list_of_as') >> ForallBend({'b': S('a')})}
 source = {'list_of_as': [{'a': 23}, {'a': 27}]}
 ret = bend(MAPPING, source)
@@ -232,8 +250,11 @@ element of the iterable, which are than "flattened" into a single
 list.
 
 ```python
-MAPPING = {'doubles_triples': S('ints') >> FlatForall(lambda x: [x * 1, x * 3])}
-source = {'ints': [2, 15, 50])
+from jsonbender import bend, S
+from jsonbender.list_ops import FlatForall
+
+MAPPING = {'doubles_triples': S('ints') >> FlatForall(lambda x: [x * 2, x * 3])}
+source = {'ints': [2, 15, 50]}
 ret = bend(MAPPING, source)
 assert ret == {'doubles_triples': [4, 6, 30, 45, 100, 150]}
 ```
@@ -252,12 +273,23 @@ doesn't raise a LookupError (KeyError, IndexError etc.).
 If all benders raise LookupError, re-raise the last raised exception.
 
 ```python
+from jsonbender import S
+from jsonbender.control_flow import Alternation
+
 b = Alternation(S(1), S(0), S('key1'))
 
 b(['a', 'b'])  #  -> 'b'
 b(['a'])  #  -> 'a'
-b([])  #  -> KeyError
-b({})  #  -> KeyError
+try:
+    b([])  #  -> TypeError
+except TypeError:
+    pass
+
+try:
+    b({})  #  -> KeyError
+except KeyError:
+    pass
+
 b({'key1': 23})  # -> 23
 ```
 
@@ -268,6 +300,9 @@ If the condition bender evaluates to true, return the value of the first
 bender. If it evaluates to false, return the value of the second bender.
 
 ```python
+from jsonbender import K, S
+from jsonbender.control_flow import If
+
 if_ = If(S('country') == K('China'), S('first_name'), S('last_name'))
 if_({'country': 'China',
      'first_name': 'Li',
@@ -291,6 +326,9 @@ If the key is not in the case container, the default is used.
 If it's unavailable, raise the original LookupError.
 
 ```python
+from jsonbender import K, S
+from jsonbender.control_flow import Switch
+
 b = Switch(S('service'),
            {'twitter': S('handle'),
             'mastodon': S('handle') + K('@') + S('server')},
@@ -316,6 +354,8 @@ named parameters.
 It uses the same syntax as `str.format()`
 
 ```python
+from jsonbender import bend, Format, S
+
 MAPPING = {'formatted': Format('{} {} {last}',
                                S('first'),
                                S('second'),
@@ -332,13 +372,16 @@ All JSONBenders can be composed with other benders using `<<` and `>>`
 to make them receive previously bended values.
 
 ```python
+from jsonbender import bend, F, S
+from jsonbender.list_ops import Forall
+
 MAPPING = {
     'name': S('name'),
     'pythonista': S('prog_langs') >> Forall(str.lower) >> F(lambda ls: 'python' in ls),
 }
 source = {
     'name': 'Mary',
-    'prog_lags': ['C', 'Python', 'Lua'],
+    'prog_langs': ['C', 'Python', 'Lua'],
 }
 ret = bend(MAPPING, source)
 assert ret == {'name': 'Mary', 'pythonista': True}
@@ -354,6 +397,8 @@ Whatever you pass for the argument is can be used at bending time by the
 
 
 ```python
+from jsonbender import bend, Context, S
+
 MAPPING = {
     'name': S('name'),
     'age': (Context() >> S('year')) - S('birthyear'),
