@@ -220,20 +220,22 @@ def bend(mapping, source, context=None):
 
 
 def _bend(mapping, transport):
-    res = {}
-    for k, value in iteritems(mapping):
-        if isinstance(value, Bender):
+    if isinstance(mapping, list):
+        return [_bend(v, transport) for v in mapping]
+
+    elif isinstance(mapping, dict):
+        res = {}
+        for k, v in iteritems(mapping):
             try:
-                newv = value(transport)
+                res[k] = _bend(v, transport)
             except Exception as e:
                 m = 'Error for key {}: {}'.format(k, str(e))
                 raise BendingException(m)
-        elif isinstance(value, list):
-            newv = list(map(lambda v: _bend(v, transport), value))
-        elif isinstance(value, dict):
-            newv = _bend(value, transport)
-        else:
-            newv = value
-        res[k] = newv
-    return res
+        return res
+
+    elif isinstance(mapping, Bender):
+        return mapping(transport)
+
+    else:
+        return mapping
 
