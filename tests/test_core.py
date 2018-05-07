@@ -61,6 +61,12 @@ class TestBend(unittest.TestCase):
         }
         self.assertDictEqual(bend(mapping, source), expected)
 
+    def test_list_with_non_dict_elements(self):
+        mapping = {'k': ['foo1', S('bar1')]}
+        source = {'bar1': 'val 1'}
+        expected = {'k': ['foo1', 'val 1']}
+        self.assertDictEqual(bend(mapping, source), expected)
+
     def test_bending_exception_is_raised_when_something_bad_happens(self):
         mapping = {'a': S('nonexistant')}
         source = {}
