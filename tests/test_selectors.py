@@ -11,6 +11,14 @@ class TestK(unittest.TestCase, BenderTestMixin):
         self.assert_bender(K(1), {}, 1)
         self.assert_bender(K('string'), {}, 'string')
 
+    def test_k_list_constructor(self):
+        sample_list = []
+        k = K(sample_list)
+
+        sample_list.append(1)
+        self.assertListEqual(sample_list, [1])
+        self.assertListEqual(k.execute('a'), [])
+
 
 class STestsMixin(BenderTestMixin):
     def test_no_selector_raises_value_error(self):

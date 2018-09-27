@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from jsonbender.core import Bender
 
 
@@ -6,7 +8,12 @@ class K(Bender):
     Selects a constant value.
     """
     def __init__(self, value):
-        self._val = value
+        try:
+            iter(value)
+        except TypeError:
+            self._val = value
+        else:
+            self._val = deepcopy(value)
 
     def execute(self, source):
         return self._val
