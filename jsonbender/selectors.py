@@ -7,13 +7,13 @@ class K(Bender):
     """
     Selects a constant value.
     """
-    def __init__(self, value):
+    def __init__(self, value, copy=False):
         try:
             iter(value)
         except TypeError:
             self._val = value
         else:
-            self._val = deepcopy(value)
+            self._val = deepcopy(value) if copy else value
 
     def execute(self, source):
         return self._val

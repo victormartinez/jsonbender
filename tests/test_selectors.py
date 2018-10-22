@@ -17,6 +17,14 @@ class TestK(unittest.TestCase, BenderTestMixin):
 
         sample_list.append(1)
         self.assertListEqual(sample_list, [1])
+        self.assertListEqual(k.execute('a'), [1])
+
+    def test_k_list_constructor_copy(self):
+        sample_list = []
+        k = K(sample_list, copy=True)
+
+        sample_list.append(1)
+        self.assertListEqual(sample_list, [1])
         self.assertListEqual(k.execute('a'), [])
 
 
